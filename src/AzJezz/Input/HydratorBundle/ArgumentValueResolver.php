@@ -53,10 +53,10 @@ final class ArgumentValueResolver implements ArgumentValueResolverInterface
      */
     public function resolve(Request $request, ArgumentMetadata $argument): iterable
     {
-        if (Request::METHOD_POST === $request->getMethod()) {
-            $input = $request->request->all();
-        } else {
+        if (Request::METHOD_GET === $request->getMethod()) {
             $input = $request->query->all();
+        } else {
+            $input = $request->request->all();
         }
 
         /** @var non-empty-list<class-string<InputInterface>> $types */

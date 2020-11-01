@@ -86,6 +86,22 @@ final class ArgumentValueResolverTest extends TestCase
         static::assertSame('hello', $search->query);
     }
 
+    public function testThatItDoesntUseQueryParametersOnNonGetRequests(): void
+    {
+        $request = Request::create('/search', Request::METHOD_DELETE);
+        $request->request->set('query', 'REQUEST');
+        $request->query->set('query', 'QUERY');
+
+        $argument = new ArgumentMetadata('search', Search::class, false, false, null, false);
+
+        /** @var Generator<int, Search, void, mixed> $values */
+        $values = $this->resolver->resolve($request, $argument);
+        /** @var Search $search */
+        $search = iterator_to_array($values)[0];
+
+        static::assertSame('REQUEST', $search->query);
+    }
+
     public function testThatItDoesntUseQueryParametersInPostRequests(): void
     {
         $request = Request::create('/search', Request::METHOD_POST);

@@ -67,7 +67,7 @@ final class Search implements InputInterface
 
 later you can request the DTO as a parameter in your controller:
 
-```
+```php
 // src/Controller/SearchController.php
 <?php
 

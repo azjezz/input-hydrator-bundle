@@ -61,17 +61,20 @@ final class ArgumentValueResolver implements ArgumentValueResolverInterface
 
         /** @var non-empty-list<class-string<InputInterface>> $types */
         $types = explode('|', (string) $argument->getType());
+        $success = false;
         $exceptions = [];
         foreach ($types as $type) {
             try {
                 yield $this->hydrator->hydrate($type, $input);
+                $success = true;
+                break;
             } catch (BadInputException $exception) {
                 $exceptions[] = $exception;
             }
         }
 
         $exception = $exceptions[0] ?? null;
-        if (null !== $exception) {
+        if (null !== $exception && !$success) {
             if ($argument->hasDefaultValue()) {
                 /** @psalm-suppress MissingThrowsDocblock as the default value is present. */
                 yield $argument->getDefaultValue();

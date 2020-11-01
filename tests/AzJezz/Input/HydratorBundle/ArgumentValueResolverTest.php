@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AzJezz\Input\HydratorBundle\Test;
 
 use AzJezz\Input\HydratorBundle\ArgumentValueResolver;
+use AzJezz\Input\HydratorBundle\Test\Fixture\TokenCredentials;
+use AzJezz\Input\HydratorBundle\Test\Fixture\UsernamePasswordCredentials;
 use AzJezz\Input\HydratorBundle\Test\Fixture\Search;
 use Generator;
 use PHPUnit\Framework\TestCase;
@@ -84,6 +86,41 @@ final class ArgumentValueResolverTest extends TestCase
         $search = iterator_to_array($values)[0];
 
         static::assertSame('hello', $search->query);
+    }
+
+    public function testThatItDoesntHydrateAllDTOs(): void
+    {
+        $request = Request::create('/login', Request::METHOD_POST);
+        $request->request->set('username', 'azjezz');
+        $request->request->set('password', '123456789');
+        $request->request->set('token', 'secret');
+
+        $argument = new ArgumentMetadata('credentials', sprintf('%s|%s', UsernamePasswordCredentials::class, TokenCredentials::class), false, false, null, false);
+
+        $values = $this->resolver->resolve($request, $argument);
+        $values = iterator_to_array($values);
+
+        self::assertCount(1, $values);
+        self::assertInstanceOf(UsernamePasswordCredentials::class, $values[0]);
+        self::assertSame('azjezz', $values[0]->username);
+        self::assertSame('123456789', $values[0]->password);
+    }
+
+    public function testThatItDoesntThrowWhenOnOfTheDTOsIsInvalid(): void
+    {
+        $request = Request::create('/login', Request::METHOD_POST);
+        $request->request->set('username', 'azjezz');
+        $request->request->set('password', []);
+        $request->request->set('token', 'secret');
+
+        $argument = new ArgumentMetadata('credentials', sprintf('%s|%s', UsernamePasswordCredentials::class, TokenCredentials::class), false, false, null, false);
+
+        $values = $this->resolver->resolve($request, $argument);
+        $values = iterator_to_array($values);
+
+        self::assertCount(1, $values);
+        self::assertInstanceOf(TokenCredentials::class, $values[0]);
+        self::assertSame('secret', $values[0]->token);
     }
 
     public function testThatItDoesntUseQueryParametersOnNonGetRequests(): void

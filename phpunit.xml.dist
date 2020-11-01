@@ -5,6 +5,11 @@
     <include>
       <directory>src</directory>
     </include>
+    <exclude>
+      <directory>src/AzJezz/Input/HydratorBundle/DependencyInjection</directory>
+      <directory>src/AzJezz/Input/HydratorBundle/Resources</directory>
+      <directory>src/AzJezz/Input/HydratorBundle/InputHydratorBundle.php</directory>
+    </exclude>
     <report>
       <clover outputFile="tests/logs/clover.xml"/>
     </report>
